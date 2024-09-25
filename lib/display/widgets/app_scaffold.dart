@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_challenges/display/screens/chat.dart';
 import 'package:flutter_challenges/display/screens/home.dart';
 import 'package:flutter_challenges/display/screens/news/news_bottom_bar.dart';
 
@@ -43,7 +44,7 @@ class AppScaffold extends StatelessWidget {
               leading: const Icon(Icons.contact_phone_outlined),
               title: const Text('Contactos'),
               onTap: () {
-                Navigator.pushNamed(context, '/contacts');
+                Navigator.push(context, Chat.route());
               },
             ),
             ListTile(
