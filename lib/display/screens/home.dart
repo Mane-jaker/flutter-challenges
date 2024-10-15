@@ -36,45 +36,31 @@ class Home extends StatelessWidget {
       ),
     ];
 
-    return AppScaffold(
+    return const AppScaffold(
       title: 'Home',
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            const ListTile(
+            ListTile(
               leading: CircleAvatar(
                 backgroundImage: AssetImage(
-                    'assets/jake.JPG'), // Ruta de tu imagen en assets
+                    'assets/conejo.jpg'), // Ruta de tu imagen en assets
               ),
-              title: Text('App de:'),
-              subtitle: Text('Angel Manuel Bautista Vazquez'),
+              title: Text('El papu:'),
+              subtitle: Text('Jorge Brandon Chandomi Esponda'),
             ),
-            const Text(
-              'Team',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            ...students.map(
-              (student) {
-                return StudentCard(
-                  name: student.name,
-                  id: student.id,
-                  tel: student.tel,
-                  sms: student.sms,
-                );
-              },
-            ),
-            const Text(
+            Text(
               'Repository',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const RepositoryTile(
+            RepositoryTile(
               text: 'Team:',
               link: 'https://github.com/Mane-jaker/flutter-challenges',
             ),
-            const RepositoryTile(
+            RepositoryTile(
               text: 'Personal:',
               link:
                   'https://github.com/Mane-jaker/flutter-challenges/tree/mane',

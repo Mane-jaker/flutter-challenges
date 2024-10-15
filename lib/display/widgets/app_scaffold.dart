@@ -48,13 +48,6 @@ class AppScaffold extends StatelessWidget {
                 Navigator.push(context, Chat.route());
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.newspaper_rounded),
-              title: const Text('Noticias'),
-              onTap: () {
-                Navigator.push(context, NewsBottomBar.route());
-              },
-            ),
           ],
         ),
       ),

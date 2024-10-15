@@ -151,9 +151,9 @@ class _ChatState extends State<Chat> {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isUser
-                            ? Colors.black
-                            : Colors
-                                .white, // Fondo negro para el usuario, blanco para el bot
+                            ? const Color.fromARGB(255, 82, 82, 82)
+                            : const Color.fromARGB(255, 153, 213,
+                                155), // Fondo negro para el usuario, blanco para el bot
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
