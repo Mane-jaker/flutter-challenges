@@ -29,7 +29,8 @@ class AppScaffold extends StatelessWidget {
             const SizedBox(
               height: 120,
               child: DrawerHeader(
-                decoration: BoxDecoration(color: Color.fromARGB(255, 209, 171, 249)),
+                decoration:
+                    BoxDecoration(color: Color.fromARGB(255, 209, 171, 249)),
                 child: Text('Menú de Navegación'),
               ),
             ),
@@ -41,8 +42,8 @@ class AppScaffold extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.contact_phone_outlined),
-              title: const Text('Contactos'),
+              leading: const Icon(Icons.chat_rounded),
+              title: const Text('Chat'),
               onTap: () {
                 Navigator.push(context, Chat.route());
               },
@@ -58,7 +59,8 @@ class AppScaffold extends StatelessWidget {
         ),
       ),
       body: body,
-      bottomNavigationBar: bottomNavigationBar, // Mostrar solo si es proporcionado
+      bottomNavigationBar:
+          bottomNavigationBar, // Mostrar solo si es proporcionado
     );
   }
 }
