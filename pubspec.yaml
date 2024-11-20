@@ -19,6 +19,8 @@ dependencies:
   google_generative_ai: ^0.4.6
   shared_preferences: ^2.3.2
   connectivity_plus: ^6.0.5
+  flutter_tts: ^4.0.2
+  speech_to_text: ^7.0.0
 
 dev_dependencies:
   flutter_test:

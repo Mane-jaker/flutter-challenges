@@ -7,6 +7,10 @@ import 'package:flutter_challenges/display/widgets/app_scaffold.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -26,7 +30,16 @@ class _ChatState extends State<Chat> {
   final TextEditingController _controller = TextEditingController();
   late GenerativeModel _model;
   bool _isConnected = true;
+  bool _isLoading = false;
   static const int maxContextMessages = 10;
+
+  // Speech-to-Text and Text-to-Speech instances
+  final FlutterTts flutterTts = FlutterTts();
+  bool _hasSpeech = false;
+  bool _isListening = false;
+  String lastWords = '';
+  String _currentLocaleId = 'en_US';
+  final SpeechToText speech = SpeechToText();
 
   Future<void> _checkConnectivity() async {
     var connectivityResult = await Connectivity().checkConnectivity();
@@ -62,17 +75,93 @@ class _ChatState extends State<Chat> {
     }
   }
 
+  Future<void> initSpeechState() async {
+    try {
+      var hasSpeech = await speech.initialize(
+        onError: errorListener,
+        onStatus: statusListener,
+      );
+      if (hasSpeech) {
+        var systemLocale = await speech.systemLocale();
+        _currentLocaleId = systemLocale?.localeId ?? 'en_US';
+      }
+      if (!mounted) return;
+
+      setState(() {
+        _hasSpeech = hasSpeech;
+      });
+    } catch (e) {
+      setState(() {
+        lastWords = 'Speech recognition failed: ${e.toString()}';
+        _hasSpeech = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _model = GenerativeModel(
       model: 'gemini-1.5-flash-latest',
-      apiKey:
-          'AIzaSyADl4iRQDNbimyFNgYJaFUvb-HTtk58Pyk', // Reemplaza con tu clave API
+      apiKey: 'AIzaSyA0jjw1v4PJe7K3Y_dxTe2cdq-P0L857pQ',
     );
+    initSpeechState(); // Inicializar el reconocimiento de voz
     _loadMessages(); // Cargar los mensajes guardados al iniciar
     _checkConnectivity(); // Verificar conectividad al iniciar
     Connectivity().onConnectivityChanged.listen(_updateConnectivityStatus);
+  }
+
+  void startListening() {
+    lastWords = '';
+    speech.listen(
+      onResult: resultListener,
+      listenFor: const Duration(seconds: 50),
+      pauseFor: const Duration(seconds: 3),
+      localeId: _currentLocaleId,
+      onSoundLevelChange: soundLevelListener,
+      cancelOnError: true,
+      partialResults: true,
+    );
+    setState(() {
+      _isListening = true;
+    });
+  }
+
+  void stopListening() {
+    speech.stop();
+    setState(() {
+      _isListening = false;
+    });
+  }
+
+  void resultListener(SpeechRecognitionResult result) {
+    setState(() {
+      lastWords = result.recognizedWords;
+      _controller.text =
+          lastWords; // Actualiza el campo de texto con las palabras reconocidas
+      if (result.finalResult && lastWords.isNotEmpty) {
+        sendMessage(lastWords); // Envía el mensaje reconocido por voz
+        _controller.clear(); // Limpia el campo de texto
+      }
+    });
+  }
+
+  void soundLevelListener(double level) {
+    setState(() {
+      // Update the UI with the sound level if needed
+    });
+  }
+
+  void errorListener(SpeechRecognitionError error) {
+    setState(() {
+      lastWords = 'Error: ${error.errorMsg}';
+    });
+  }
+
+  void statusListener(String status) {
+    setState(() {
+      _isListening = speech.isListening;
+    });
   }
 
   Future<void> _saveMessages() async {
@@ -85,6 +174,7 @@ class _ChatState extends State<Chat> {
   Future<void> sendMessage(String message) async {
     setState(() {
       _messages.add({'user': message}); // Agrega el mensaje del usuario
+      _isLoading = true;
     });
     _saveMessages(); // Guarda el historial actualizado
 
@@ -116,11 +206,15 @@ class _ChatState extends State<Chat> {
         _messages.add({
           'bot': response.text ?? 'No response available.'
         }); // Respuesta del bot
+        _isLoading = false;
       });
       _saveMessages(); // Guarda el historial actualizado con la respuesta del bot
+      // Reproduce la respuesta del bot usando Text-to-Speech
+      await flutterTts.speak(response.text ?? 'No response available.');
     } catch (error) {
       setState(() {
         _messages.add({'bot': 'Error: No se pudo obtener una respuesta.'});
+        _isLoading = false;
       });
       _saveMessages(); // Guarda el historial incluso si ocurre un error
     }
@@ -171,6 +265,11 @@ class _ChatState extends State<Chat> {
               },
             ),
           ),
+          if (_isLoading) // Mostrar el indicador de carga si está cargando
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            ),
           // Campo de texto y botón de enviar
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -195,6 +294,10 @@ class _ChatState extends State<Chat> {
                           }
                         }
                       : null,
+                ),
+                IconButton(
+                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
+                  onPressed: _isListening ? stopListening : startListening,
                 ),
               ],
             ),
